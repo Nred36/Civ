@@ -18,7 +18,7 @@ public class DrawSmiley extends JPanel {
     private double t = 1;
 
     /**
-     * draws a target with a random colour for each ring
+     * draws a target with a random colour for randomly placed oval and rectangle drawn
      *
      * @param g
      */
