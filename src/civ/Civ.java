@@ -74,7 +74,9 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
 
         for (int l = 0; l < 9; l++) {
             for (int i = 0; i < rows; i++) {
-                Hexagon(i, l, zoom);
+                Polygon p = new Polygon();
+                hex.add(p);
+                Hexagon(i, l, zoom, (l + i));
             }
         }
         spawn(62);
@@ -85,7 +87,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         addMouseWheelListener(this);
     }
 
-    public void Hexagon(int c, int l, int size) {
+    public void Hexagon(int c, int l, int size, int i) {
         int x = c * 12 * size, y = 30;
         if (c % 2 == 0) {
             y += (int) (8 * size * (Math.sqrt(3.0) / 2));
@@ -101,7 +103,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         p.addPoint(12 * size + x, y + (int) Math.ceil(16 * size * (Math.sqrt(3.0) / 2)));
         p.addPoint(4 * size + x, y + (int) Math.ceil(16 * size * (Math.sqrt(3.0) / 2)));
         p.addPoint(x, y + (int) Math.ceil(8 * size * (Math.sqrt(3.0) / 2)));
-        hex.add(p);
+        hex.set(i, p);
     }
 
     public void paintComponent(Graphics g) {
@@ -110,13 +112,14 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         int curr = 0;
         for (int l = 0; l < 9; l++) {
             for (int i = 0; i < rows; i++) {
+                Hexagon(i, l, zoom, (i + l));
                 dr.setColor(col(grid[i][l][0]));
                 dr.fillPolygon(hex.get(curr));
                 dr.setColor(Color.black);
                 dr.drawPolygon(hex.get(curr));
 
                 for (int d = 1; d < 4; d++) {
-                    if (grid[i][l][d] == 1&&numUn>0) {
+                    if (grid[i][l][d] == 1 && numUn > 0) {
                         dr.setColor(col(units.get(numUn - 1).num() + 5));
                         dr.fillRect(hex.get(curr).xpoints[0] + 3, hex.get(curr).ypoints[0] + 20, 12, 12);
 
@@ -135,7 +138,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
             for (int i = 0; i < borders.size(); i++) {
                 dr.drawPolygon(borders.get(i));
             }
-            if (numUn > 0&&select!=99) {               
+            if (numUn > 0 && select != 99) {
                 dr.setColor(new Color(64, 255, 255));
                 dr.drawRect(select * 25 + 9, 429, 16, 16);//selected unit
                 dr.drawRect(select * 25 + 9, 429, 16, 16);//selected unit
@@ -249,68 +252,86 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     @Override
     public void mousePressed(MouseEvent e) {
         Rectangle m = new Rectangle(mx, my, 1, 1);
-        if (mode == 0&&select!=99) {
-            System.out.println(select);
-            for (int i = 0; i < units.get(select).commands().length; i++) {
-                if (m.intersects(80, i * 20 + 442, 40, 20)) {
-                    System.out.println(units.get(select).commands()[i]);
-                    //if (i == 0) {
-                    borders.add(units.get(select).city(62, hex, rows));                    
-                    units.remove(select);
-                    numUn--;
-                    if (numUn - 1 > select) {
-                        select++;
-                    } else if (numUn-1< select) {
-                        select = 0;
-                    } else {
-                        select =99;
+        if (e.getButton() == 1) {
+            if (mode == 0 && select != 99) {
+                for (int i = 0; i < units.get(select).commands().length; i++) {
+                    if (m.intersects(80, i * 20 + 442, 40, 20)) {
+                        //if (i == 0) {
+                        borders.add(units.get(select).city(62, hex, rows));
+                        units.remove(select);
+                        numUn--;
+                        if (numUn - 1 > select) {
+                            select++;
+                        } else if (numUn - 1 < select) {
+                            select = 0;
+                        } else {
+                            select = 99;
+                        }
+                        i = 99;
+                        break;
+                        //}
                     }
-                    i=99;           
-                    break;
-                    //}
-                }
 
-            }
-        }
-
-        for (int i = 0; i < hex.size(); i++) {
-            if (hex.get(i).intersects(m)) {
-                if (mode == 0) {
-                    if (m.intersects(hex.get(units.get(select).c()).xpoints[0] + 2, hex.get(units.get(select).c()).ypoints[0] + 19, 13, 13)) {
-                        mode = 2;
-                    }
-                }
-                if (mode == 7) {
-                    int t = i / rows;
-                    grid[i - (rows * t)][t][0] = temp;
-                    i = 9999;
-                    break;
                 }
             }
+
+            for (int i = 0; i < hex.size(); i++) {
+                if (hex.get(i).intersects(m)) {
+                    if (mode == 0) {
+                        if (m.intersects(hex.get(units.get(select).c()).xpoints[0] + 2, hex.get(units.get(select).c()).ypoints[0] + 19, 13, 13)) {
+                            mode = 2;
+                        }
+                    }
+                    if (mode == 7) {
+                        int t = i / rows;
+                        grid[i - (rows * t)][t][0] = temp;
+                        i = 9999;
+                        break;
+                    }
+                }
+            }
+        } else {
+            if (mode == 0) {
+                for (int i = 0; i < hex.size(); i++) {
+                    if (hex.get(i).intersects(m)) {
+                        int t = i / rows;
+                        grid[i - (rows * t)][t][1] = grid[units.get(select).x()][units.get(select).y()][1];
+                        grid[units.get(select).x()][units.get(select).y()][1] = 0;
+                        units.set(select, new Settler());
+                        units.get(select).pos(i - (rows * t), t, i);
+
+                    }
+                }
+            }
         }
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent e
+    ) {
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
-
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
+    public void mouseEntered(MouseEvent e
+    ) {
 
     }
 
     @Override
-    public void keyPressed(KeyEvent e) {
+    public void mouseExited(MouseEvent e
+    ) {
+
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e
+    ) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e
+    ) {
         if (e.getKeyCode() == KeyEvent.VK_W) {
             pres[0] = true;
         } else if (e.getKeyCode() == KeyEvent.VK_S) {
@@ -372,7 +393,8 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     }
 
     @Override
-    public void keyReleased(KeyEvent e) {
+    public void keyReleased(KeyEvent e
+    ) {
         if (e.getKeyCode() == KeyEvent.VK_W) {
             pres[0] = false;
         } else if (e.getKeyCode() == KeyEvent.VK_S) {
@@ -386,19 +408,22 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
+    public void mouseDragged(MouseEvent e
+    ) {
         mx = e.getX();
         my = e.getY();
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {
+    public void mouseMoved(MouseEvent e
+    ) {
         mx = e.getX();
         my = e.getY();
     }
 
     @Override
-    public void mouseWheelMoved(MouseWheelEvent e) {
+    public void mouseWheelMoved(MouseWheelEvent e
+    ) {
         if (mode == 0) {
             if (zoom < 5 && e.getPreciseWheelRotation() < 0) {
                 zoom++;
