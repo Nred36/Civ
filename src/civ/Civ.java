@@ -38,8 +38,9 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     ArrayList<Polygon> borders = new ArrayList<Polygon>();
     boolean[] pres = {false, false, false, false};
     int mx, my, zoom = 3, mode = 0, temp = 0;
-    Unit[] units = new Unit[20];
-    int numUn = 0, select = 99, turn, rows = 14;
+    ArrayList<Unit> units = new ArrayList<Unit>();
+    int numUn = 0, select = 99, turn;
+    static int rows = 14;
     int[][][] grid = new int[rows][9][4];
     double research, gold, happiness;
 
@@ -68,6 +69,15 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         } catch (IOException a) {
             System.out.println("Couldn't Load");
         }
+        units.add(new Settler());
+        temp = units.get(numUn).num();
+
+        for (int l = 0; l < 9; l++) {
+            for (int i = 0; i < rows; i++) {
+                Hexagon(i, l, zoom);
+            }
+        }
+        spawn(62);
 
         addMouseListener(this);
         addKeyListener(this);
@@ -100,18 +110,14 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         int curr = 0;
         for (int l = 0; l < 9; l++) {
             for (int i = 0; i < rows; i++) {
-
-                Hexagon(i, l, zoom);
-
                 dr.setColor(col(grid[i][l][0]));
-
                 dr.fillPolygon(hex.get(curr));
                 dr.setColor(Color.black);
                 dr.drawPolygon(hex.get(curr));
 
                 for (int d = 1; d < 4; d++) {
-                    if (grid[i][l][d] == 1) {
-                        dr.setColor(col(units[numUn - 1].num() + 5));
+                    if (grid[i][l][d] == 1&&numUn>0) {
+                        dr.setColor(col(units.get(numUn - 1).num() + 5));
                         dr.fillRect(hex.get(curr).xpoints[0] + 3, hex.get(curr).ypoints[0] + 20, 12, 12);
 
                     }
@@ -120,12 +126,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                 curr++;
             }
 
-            if (mode == 1) {
-                units[numUn] = new Settler();
-                temp = units[numUn].num();
-                dr.setColor(col(units[numUn].num() + 5));
-                dr.fillRect(mx - 6, my - 6, 12, 12);
-            } else if (mode == 7) {
+            if (mode == 7) {
                 dr.setColor(col(temp));
                 dr.fillRect(mx - 6, my - 6, 12, 12);
             }
@@ -134,16 +135,19 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
             for (int i = 0; i < borders.size(); i++) {
                 dr.drawPolygon(borders.get(i));
             }
-            if (numUn > 0) {
+            if (numUn > 0&&select!=99) {               
                 dr.setColor(new Color(64, 255, 255));
                 dr.drawRect(select * 25 + 9, 429, 16, 16);//selected unit
                 dr.drawRect(select * 25 + 9, 429, 16, 16);//selected unit
-                dr.drawRect(hex.get(units[select].c()).xpoints[0] + 2, hex.get(units[select].c()).ypoints[0] + 19, 13, 13);
+                dr.drawRect(hex.get(units.get(select).c()).xpoints[0] + 2, hex.get(units.get(select).c()).ypoints[0] + 19, 13, 13);
                 dr.setStroke(new BasicStroke(1));
                 if (numUn > 0) {
                     for (int i = 0; i < numUn; i++) {
-                        dr.setColor(col(units[numUn - 1].num() + 5));
+                        dr.setColor(col(units.get(numUn - 1).num() + 5));
                         dr.fillRect(i * 25 + 10, 430, 15, 15);//units
+                    }
+                    for (int i = 0; i < units.get(select).commands().length; i++) {
+                        dr.drawString(units.get(select).commands()[i], 80, i * 20 + 462);
                     }
                 }
             }
@@ -229,6 +233,14 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         return c;
     }
 
+    public void spawn(int i) {
+        int t = i / rows;
+        grid[i - (rows * t)][t][1] = temp;
+        units.get(numUn).pos(i - (rows * t), t, i);
+        select = numUn;
+        numUn++;
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -237,66 +249,38 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     @Override
     public void mousePressed(MouseEvent e) {
         Rectangle m = new Rectangle(mx, my, 1, 1);
+        if (mode == 0&&select!=99) {
+            System.out.println(select);
+            for (int i = 0; i < units.get(select).commands().length; i++) {
+                if (m.intersects(80, i * 20 + 442, 40, 20)) {
+                    System.out.println(units.get(select).commands()[i]);
+                    //if (i == 0) {
+                    borders.add(units.get(select).city(62, hex, rows));                    
+                    units.remove(select);
+                    numUn--;
+                    if (numUn - 1 > select) {
+                        select++;
+                    } else if (numUn-1< select) {
+                        select = 0;
+                    } else {
+                        select =99;
+                    }
+                    i=99;           
+                    break;
+                    //}
+                }
+
+            }
+        }
+
         for (int i = 0; i < hex.size(); i++) {
             if (hex.get(i).intersects(m)) {
                 if (mode == 0) {
-                    if (m.intersects(hex.get(units[select].c()).xpoints[0] + 2, hex.get(units[select].c()).ypoints[0] + 19, 13, 13)) {
+                    if (m.intersects(hex.get(units.get(select).c()).xpoints[0] + 2, hex.get(units.get(select).c()).ypoints[0] + 19, 13, 13)) {
                         mode = 2;
                     }
-                } else if (mode == 1) {
-                    int t = i / rows;
-                    grid[i - (rows * t)][t][1] = temp;
-                    units[numUn].pos(i - (rows * t), t, i);
-                    select = numUn;
-                    Polygon p = new Polygon();
-                    if (i % 2 != 0) {
-                        p.addPoint(hex.get(i - (rows + 1)).xpoints[0], hex.get(i - (rows + 1)).ypoints[0]);
-                        p.addPoint(hex.get(i - (rows + 1)).xpoints[1], hex.get(i - (rows + 1)).ypoints[1]);
-                        p.addPoint(hex.get(i - rows).xpoints[0], hex.get(i - rows).ypoints[0]);
-                        p.addPoint(hex.get(i - rows).xpoints[1], hex.get(i - rows).ypoints[1]);
-                        p.addPoint(hex.get(i - (rows - 1)).xpoints[0], hex.get(i - rows - 1).ypoints[0]);
-                        p.addPoint(hex.get(i - (rows - 1)).xpoints[0], hex.get(i - (rows - 1)).ypoints[0]);
-                        p.addPoint(hex.get(i - (rows - 1)).xpoints[1], hex.get(i - (rows - 1)).ypoints[1]);
-                        p.addPoint(hex.get(i - (rows - 1)).xpoints[2], hex.get(i - (rows - 1)).ypoints[2]);
-                        p.addPoint(hex.get(i + 1).xpoints[1], hex.get(i + 1).ypoints[1]);
-                        p.addPoint(hex.get(i + 1).xpoints[2], hex.get(i + 1).ypoints[2]);
-                        p.addPoint(hex.get(i + 1).xpoints[3], hex.get(i + 1).ypoints[3]);
-                        p.addPoint(hex.get(i + 1).xpoints[4], hex.get(i + 1).ypoints[4]);
-                        p.addPoint(hex.get(i + rows).xpoints[3], hex.get(i + rows).ypoints[3]);
-                        p.addPoint(hex.get(i + rows).xpoints[4], hex.get(i + rows).ypoints[4]);
-                        p.addPoint(hex.get(i + rows).xpoints[5], hex.get(i + rows).ypoints[5]);
-                        p.addPoint(hex.get(i - 1).xpoints[3], hex.get(i - 1).ypoints[3]);
-                        p.addPoint(hex.get(i - 1).xpoints[4], hex.get(i - 1).ypoints[4]);
-                        p.addPoint(hex.get(i - 1).xpoints[5], hex.get(i - 1).ypoints[5]);
-                        p.addPoint(hex.get(i - 1).xpoints[0], hex.get(i - 1).ypoints[0]);
-                        p.addPoint(hex.get(i - (rows + 1)).xpoints[4], hex.get(i - (rows + 1)).ypoints[4]);
-                        p.addPoint(hex.get(i - (rows + 1)).xpoints[5], hex.get(i - (rows + 1)).ypoints[5]);
-                    } else {
-                        p.addPoint(hex.get(i - 1).xpoints[0], hex.get(i - 1).ypoints[0]);
-                        p.addPoint(hex.get(i - 1).xpoints[1], hex.get(i - 1).ypoints[1]);
-                        p.addPoint(hex.get(i - rows).xpoints[0], hex.get(i - rows).ypoints[0]);
-                        p.addPoint(hex.get(i - rows).xpoints[1], hex.get(i - rows).ypoints[1]);
-                        p.addPoint(hex.get(i - rows).xpoints[2], hex.get(i - rows).ypoints[2]);
-                        p.addPoint(hex.get(i + 1).xpoints[1], hex.get(i + 1).ypoints[1]);
-                        p.addPoint(hex.get(i + 1).xpoints[2], hex.get(i + 1).ypoints[2]);
-                        p.addPoint(hex.get(i + 1).xpoints[3], hex.get(i + 1).ypoints[3]);
-                        p.addPoint(hex.get(i + 1 + rows).xpoints[2], hex.get(i + 1 + rows).ypoints[2]);
-                        p.addPoint(hex.get(i + 1 + rows).xpoints[3], hex.get(i + 1 + rows).ypoints[3]);
-                        p.addPoint(hex.get(i + 1 + rows).xpoints[4], hex.get(i + 1 + rows).ypoints[4]);
-                        p.addPoint(hex.get(i + rows).xpoints[3], hex.get(i + rows).ypoints[3]);
-                        p.addPoint(hex.get(i + rows).xpoints[4], hex.get(i + rows).ypoints[4]);
-                        p.addPoint(hex.get(i + rows).xpoints[5], hex.get(i + rows).ypoints[5]);
-                        p.addPoint(hex.get(i + (rows - 1)).xpoints[4], hex.get(i + (rows - 1)).ypoints[4]);
-                        p.addPoint(hex.get(i + (rows - 1)).xpoints[5], hex.get(i + (rows - 1)).ypoints[5]);
-                        p.addPoint(hex.get(i + (rows - 1)).xpoints[0], hex.get(i + (rows - 1)).ypoints[0]);
-                        p.addPoint(hex.get(i - 1).xpoints[5], hex.get(i - 1).ypoints[5]);
-                    }
-                    borders.add(p);
-                    numUn++;
-                    i = 9999;
-                    mode = 0;
-                    break;
-                } else if (mode == 7) {
+                }
+                if (mode == 7) {
                     int t = i / rows;
                     grid[i - (rows * t)][t][0] = temp;
                     i = 9999;
@@ -343,12 +327,15 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
             } else {
                 mode = 0;
             }
+        } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+            mode = 0;
         } else if (e.getKeyCode() == KeyEvent.VK_F1) {
-            if (mode != 1) {
-                mode = 1;
-            } else {
-                mode = 0;
-            }
+//            if (mode != 1) {
+//                mode = 1;
+//                city();
+//            } else {
+//                mode = 0;
+//            }
         } else if (e.getKeyCode() == KeyEvent.VK_F2) {
             if (mode != 2) {
                 mode = 2;
@@ -378,7 +365,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         } else if (e.getKeyCode() == KeyEvent.VK_TAB) {
             if (numUn - 1 > select) {
                 select++;
-            } else {
+            } else if (numUn - 1 < select) {
                 select = 0;
             }
         }
