@@ -24,7 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import javafx.scene.shape.Line;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
