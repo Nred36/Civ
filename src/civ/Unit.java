@@ -31,8 +31,7 @@ abstract public class Unit {
     }
 
     abstract public String[] commands();
-
-    abstract Polygon city(int i, ArrayList<Polygon> hex, int rows);
+   
 
     abstract public void pos(int x, int y, int c);
 

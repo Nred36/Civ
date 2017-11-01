@@ -63,50 +63,5 @@ public class Settler extends Unit {
         return c;
     }
 
-    public Polygon city(int i, ArrayList<Polygon> hex, int rows) {
-        Polygon p = new Polygon();
-        if (i % 2 != 0) {
-            p.addPoint(hex.get(i - (rows + 1)).xpoints[0], hex.get(i - (rows + 1)).ypoints[0]);
-            p.addPoint(hex.get(i - (rows + 1)).xpoints[1], hex.get(i - (rows + 1)).ypoints[1]);
-            p.addPoint(hex.get(i - rows).xpoints[0], hex.get(i - rows).ypoints[0]);
-            p.addPoint(hex.get(i - rows).xpoints[1], hex.get(i - rows).ypoints[1]);
-            p.addPoint(hex.get(i - (rows - 1)).xpoints[0], hex.get(i - rows - 1).ypoints[0]);
-            p.addPoint(hex.get(i - (rows - 1)).xpoints[0], hex.get(i - (rows - 1)).ypoints[0]);
-            p.addPoint(hex.get(i - (rows - 1)).xpoints[1], hex.get(i - (rows - 1)).ypoints[1]);
-            p.addPoint(hex.get(i - (rows - 1)).xpoints[2], hex.get(i - (rows - 1)).ypoints[2]);
-            p.addPoint(hex.get(i + 1).xpoints[1], hex.get(i + 1).ypoints[1]);
-            p.addPoint(hex.get(i + 1).xpoints[2], hex.get(i + 1).ypoints[2]);
-            p.addPoint(hex.get(i + 1).xpoints[3], hex.get(i + 1).ypoints[3]);
-            p.addPoint(hex.get(i + 1).xpoints[4], hex.get(i + 1).ypoints[4]);
-            p.addPoint(hex.get(i + rows).xpoints[3], hex.get(i + rows).ypoints[3]);
-            p.addPoint(hex.get(i + rows).xpoints[4], hex.get(i + rows).ypoints[4]);
-            p.addPoint(hex.get(i + rows).xpoints[5], hex.get(i + rows).ypoints[5]);
-            p.addPoint(hex.get(i - 1).xpoints[3], hex.get(i - 1).ypoints[3]);
-            p.addPoint(hex.get(i - 1).xpoints[4], hex.get(i - 1).ypoints[4]);
-            p.addPoint(hex.get(i - 1).xpoints[5], hex.get(i - 1).ypoints[5]);
-            p.addPoint(hex.get(i - 1).xpoints[0], hex.get(i - 1).ypoints[0]);
-            p.addPoint(hex.get(i - (rows + 1)).xpoints[4], hex.get(i - (rows + 1)).ypoints[4]);
-            p.addPoint(hex.get(i - (rows + 1)).xpoints[5], hex.get(i - (rows + 1)).ypoints[5]);
-        } else {
-            p.addPoint(hex.get(i - 1).xpoints[0], hex.get(i - 1).ypoints[0]);
-            p.addPoint(hex.get(i - 1).xpoints[1], hex.get(i - 1).ypoints[1]);
-            p.addPoint(hex.get(i - rows).xpoints[0], hex.get(i - rows).ypoints[0]);
-            p.addPoint(hex.get(i - rows).xpoints[1], hex.get(i - rows).ypoints[1]);
-            p.addPoint(hex.get(i - rows).xpoints[2], hex.get(i - rows).ypoints[2]);
-            p.addPoint(hex.get(i + 1).xpoints[1], hex.get(i + 1).ypoints[1]);
-            p.addPoint(hex.get(i + 1).xpoints[2], hex.get(i + 1).ypoints[2]);
-            p.addPoint(hex.get(i + 1).xpoints[3], hex.get(i + 1).ypoints[3]);
-            p.addPoint(hex.get(i + 1 + rows).xpoints[2], hex.get(i + 1 + rows).ypoints[2]);
-            p.addPoint(hex.get(i + 1 + rows).xpoints[3], hex.get(i + 1 + rows).ypoints[3]);
-            p.addPoint(hex.get(i + 1 + rows).xpoints[4], hex.get(i + 1 + rows).ypoints[4]);
-            p.addPoint(hex.get(i + rows).xpoints[3], hex.get(i + rows).ypoints[3]);
-            p.addPoint(hex.get(i + rows).xpoints[4], hex.get(i + rows).ypoints[4]);
-            p.addPoint(hex.get(i + rows).xpoints[5], hex.get(i + rows).ypoints[5]);
-            p.addPoint(hex.get(i + (rows - 1)).xpoints[4], hex.get(i + (rows - 1)).ypoints[4]);
-            p.addPoint(hex.get(i + (rows - 1)).xpoints[5], hex.get(i + (rows - 1)).ypoints[5]);
-            p.addPoint(hex.get(i + (rows - 1)).xpoints[0], hex.get(i + (rows - 1)).ypoints[0]);
-            p.addPoint(hex.get(i - 1).xpoints[5], hex.get(i - 1).ypoints[5]);
-        }
-        return p;
-    }
+    
 }

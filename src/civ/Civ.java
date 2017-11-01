@@ -38,6 +38,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     boolean[] pres = {false, false, false, false};
     int mx, my, zoom = 3, mode = 0, temp = 0;
     ArrayList<Unit> units = new ArrayList<Unit>();
+    ArrayList<City> cities = new ArrayList<City>();
     int numUn = 0, select = 99, turn;
     static int rows = 14;
     int[][][] grid = new int[rows][9][4];
@@ -75,7 +76,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
             for (int i = 0; i < rows; i++) {
                 Polygon p = new Polygon();
                 hex.add(p);
-                Hexagon(i, l, zoom, (l + i));
+                Hexagon(i, l, zoom, (i + (l * rows)));
             }
         }
         spawn(62);
@@ -111,7 +112,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         int curr = 0;
         for (int l = 0; l < 9; l++) {
             for (int i = 0; i < rows; i++) {
-                Hexagon(i, l, zoom, (i + l));
+                Hexagon(i, l, zoom, (i + (l * rows)));
                 dr.setColor(col(grid[i][l][0]));
                 dr.fillPolygon(hex.get(curr));
                 dr.setColor(Color.black);
@@ -126,6 +127,9 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                 }
                 //dr.drawString(curr + "", hex.get(curr).xpoints[0] +3, hex.get(curr).ypoints[0] + 20);
                 curr++;
+            }
+            for (int i = 0; i < cities.size(); i++) {
+                borders.set(i,cities.get(select).settle(hex, rows));
             }
 
             if (mode == 7) {
@@ -256,7 +260,8 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                 for (int i = 0; i < units.get(select).commands().length; i++) {
                     if (m.intersects(80, i * 20 + 442, 40, 20)) {
                         //if (i == 0) {
-                        borders.add(units.get(select).city(62, hex, rows));
+                        cities.add(new City(units.get(select).x(), units.get(select).y(),units.get(select).c()));
+                        borders.add(cities.get(select).settle(hex, rows));                       
                         units.remove(select);
                         numUn--;
                         if (numUn - 1 > select) {
@@ -298,7 +303,6 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                         grid[units.get(select).x()][units.get(select).y()][1] = 0;
                         units.set(select, new Settler());
                         units.get(select).pos(i - (rows * t), t, i);
-
                     }
                 }
             }
@@ -423,7 +427,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     @Override
     public void mouseWheelMoved(MouseWheelEvent e
     ) {
-        if (mode == 0) {
+        if (mode == 0) {            
             if (zoom < 5 && e.getPreciseWheelRotation() < 0) {
                 zoom++;
             } else if (zoom > 2 && e.getPreciseWheelRotation() > 0) {
