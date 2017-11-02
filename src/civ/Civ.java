@@ -282,7 +282,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
             for (int i = 0; i < hex.size(); i++) {
                 if (hex.get(i).intersects(m)) {
                     if (mode == 0) {
-                        if (m.intersects(hex.get(units.get(select).c()).xpoints[0] + 2, hex.get(units.get(select).c()).ypoints[0] + 19, 13, 13)) {
+                        if (m.intersects(hex.get(cities.get(select).getc()).xpoints[0] + 2, hex.get(units.get(select).c()).ypoints[0] + 19, 13, 13)) {
                             mode = 2;
                         }
                     }
