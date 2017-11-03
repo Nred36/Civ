@@ -69,8 +69,10 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
         } catch (IOException a) {
             System.out.println("Couldn't Load");
         }
+        units.add(new Scout());
+        spawn(60);
         units.add(new Settler());
-        temp = units.get(numUn).num();
+        spawn(62);
 
         for (int l = 0; l < 9; l++) {
             for (int i = 0; i < rows; i++) {
@@ -79,7 +81,6 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                 Hexagon(i, l, zoom, (i + (l * rows)));
             }
         }
-        spawn(62);
 
         addMouseListener(this);
         addKeyListener(this);
@@ -118,18 +119,18 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                 dr.setColor(Color.black);
                 dr.drawPolygon(hex.get(curr));
 
-                for (int d = 1; d < 4; d++) {
-                    if (grid[i][l][d] == 1 && numUn > 0) {
-                        dr.setColor(col(units.get(numUn - 1).num() + 5));
-                        dr.fillRect(hex.get(curr).xpoints[0] + 3, hex.get(curr).ypoints[0] + 20, 12, 12);
-
-                    }
+                if (grid[i][l][1] != 0 && numUn > 0) {
+                    dr.setColor(col(units.get(numUn - 1).num() + 5));
+                    dr.fillRect(hex.get(curr).xpoints[0] + 3, hex.get(curr).ypoints[0] + 20, 12, 12);
+                } else if (grid[i][l][2] == 1) {
+                    // dr.fillRect(hex.get(curr).xpoints[0] + 3, hex.get(curr).ypoints[0] + 20, 12, 12);
                 }
-                //dr.drawString(curr + "", hex.get(curr).xpoints[0] +3, hex.get(curr).ypoints[0] + 20);
+
+                dr.drawString(curr + "", hex.get(curr).xpoints[0] + 3, hex.get(curr).ypoints[0] + 20);
                 curr++;
             }
             for (int i = 0; i < cities.size(); i++) {
-                borders.set(i,cities.get(select).settle(hex, rows));
+                borders.set(i, cities.get(i).settle(hex, rows));
             }
 
             if (mode == 7) {
@@ -152,6 +153,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                         dr.setColor(col(units.get(numUn - 1).num() + 5));
                         dr.fillRect(i * 25 + 10, 430, 15, 15);//units
                     }
+
                     for (int i = 0; i < units.get(select).commands().length; i++) {
                         dr.drawString(units.get(select).commands()[i], 80, i * 20 + 462);
                     }
@@ -241,7 +243,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
 
     public void spawn(int i) {
         int t = i / rows;
-        grid[i - (rows * t)][t][1] = temp;
+        grid[i - (rows * t)][t][1] = units.get(numUn).num();
         units.get(numUn).pos(i - (rows * t), t, i);
         select = numUn;
         numUn++;
@@ -260,13 +262,14 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                 for (int i = 0; i < units.get(select).commands().length; i++) {
                     if (m.intersects(80, i * 20 + 442, 40, 20)) {
                         //if (i == 0) {
-                        cities.add(new City(units.get(select).x(), units.get(select).y(),units.get(select).c()));
-                        borders.add(cities.get(select).settle(hex, rows));                       
+                        cities.add(new City(units.get(select).x(), units.get(select).y(), units.get(select).c()));
+                        borders.add(cities.get(0).settle(hex, rows));//cities was select but multi unit break program
+                        grid = cities.get(i).cityGrid(grid);
                         units.remove(select);
                         numUn--;
                         if (numUn - 1 > select) {
                             select++;
-                        } else if (numUn - 1 < select) {
+                        } else if (numUn - 1 > select) {
                             select = 0;
                         } else {
                             select = 99;
@@ -277,18 +280,21 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                     }
 
                 }
-            }
-
-            for (int i = 0; i < hex.size(); i++) {
-                if (hex.get(i).intersects(m)) {
-                    if (mode == 0) {
-                        if (m.intersects(hex.get(cities.get(select).getc()).xpoints[0] + 2, hex.get(units.get(select).c()).ypoints[0] + 19, 13, 13)) {
-                            mode = 2;
+            } else if (mode == 0) {
+                for (int l = 0; l < 9; l++) {
+                    for (int i = 0; i < rows; i++) {
+                        if (grid[i][l][2] == 1) {
+                            if (hex.get(i + (l * rows)).intersects(m)) {
+                                mode = 2;
+                            }
                         }
                     }
-                    if (mode == 7) {
+                }
+                if (mode == 7) {
+                    for (int i = 0; i < hex.size(); i++) {
+
                         int t = i / rows;
-                        grid[i - (rows * t)][t][0] = temp;
+                        grid[i - (rows * t)][t][0] = units.get(numUn).num();
                         i = 9999;
                         break;
                     }
@@ -387,9 +393,9 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
                 }
             }
         } else if (e.getKeyCode() == KeyEvent.VK_TAB) {
-            if (numUn - 1 > select) {
+            if (numUn - 1 > select) { //if you can tab left
                 select++;
-            } else if (numUn - 1 < select) {
+            } else if (numUn - 1 == select) {
                 select = 0;
             }
         }
@@ -427,7 +433,7 @@ public class Civ extends JPanel implements MouseListener, KeyListener, MouseMoti
     @Override
     public void mouseWheelMoved(MouseWheelEvent e
     ) {
-        if (mode == 0) {            
+        if (mode == 0) {
             if (zoom < 5 && e.getPreciseWheelRotation() < 0) {
                 zoom++;
             } else if (zoom > 2 && e.getPreciseWheelRotation() > 0) {

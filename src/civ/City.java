@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package civ;
 
+import static civ.Civ.rows;
 import java.awt.Polygon;
 import java.util.ArrayList;
 
@@ -14,25 +14,77 @@ import java.util.ArrayList;
  * @author naree1878
  */
 public class City {
+
     private int x;
     private int y;
     private int c;
-    public City(int a,int b, int d){
-        x=a;
-        y=b;    
-        c=d;
+
+    public City(int a, int b, int d) {
+        x = a;
+        y = b;
+        c = d;
     }
-    public int getx(){
+
+    public int getx() {
         return x;
     }
-    public int gety(){
+
+    public int gety() {
         return y;
     }
-    public int getc(){
+
+    public int getc() {
         return c;
     }
+
+    public int[][][] cityGrid(int[][][] grid) {
+
+        int t = c / rows;
+        grid[c - (rows * t)][t][2] = 1;
+        if (c % 2 != 0) {
+            int tem = c - rows + 1;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c - rows;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c - rows - 1;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c + 1;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c -1;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c +rows;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+        } else {
+            int tem = c - 1;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c - rows;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c + 1;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c + 1 + rows;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c + rows;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+            tem = c + rows - 1;
+            t = tem / rows;
+            grid[tem - (rows * t)][t][2] = 1;
+        }
+        return grid;
+    }
+
     public Polygon settle(ArrayList<Polygon> hex, int rows) {
-        int i=c;
+        int i = c;
         Polygon p = new Polygon();
         if (i % 2 != 0) {
             p.addPoint(hex.get(i - (rows + 1)).xpoints[0], hex.get(i - (rows + 1)).ypoints[0]);
@@ -53,8 +105,7 @@ public class City {
             p.addPoint(hex.get(i - 1).xpoints[3], hex.get(i - 1).ypoints[3]);
             p.addPoint(hex.get(i - 1).xpoints[4], hex.get(i - 1).ypoints[4]);
             p.addPoint(hex.get(i - 1).xpoints[5], hex.get(i - 1).ypoints[5]);
-            p.addPoint(hex.get(i - 1).xpoints[0], hex.get(i - 1).ypoints[0]);
-            p.addPoint(hex.get(i - (rows + 1)).xpoints[4], hex.get(i - (rows + 1)).ypoints[4]);
+            p.addPoint(hex.get(i - 1).xpoints[0], hex.get(i - 1).ypoints[0]);           
             p.addPoint(hex.get(i - (rows + 1)).xpoints[5], hex.get(i - (rows + 1)).ypoints[5]);
         } else {
             p.addPoint(hex.get(i - 1).xpoints[0], hex.get(i - 1).ypoints[0]);
